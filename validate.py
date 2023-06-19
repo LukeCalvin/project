@@ -1,9 +1,14 @@
 import pandas as pd
 from gspread import Worksheet
 
+HEADER_RANGE = 'A11:T11'
+
 def validate_sheet(sheet: Worksheet) -> None:
     pass
     # Check if the header row is where we expect it to be
+    error_msg = validate_header(sheet,HEADER_RANGE)
+    if error_msg is not None:
+        raise ValueError(error_msg)
 
     # Check if the columns we expect to exist are there
 

@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import googlemaps
 from sklearn.neighbors import NearestNeighbors
+from clean_sheet import clean_data
 
 knn = NearestNeighbors(n_neighbors=15)
 
@@ -10,7 +11,8 @@ site_groups = []
 TARGET_WORK_HOURS = 12
 
 
-def cluster_sites(data, TARGET_WORK_HOURS):
+def cluster_sites(TARGET_WORK_HOURS):
+    data = clean_data()
     addresses, lats, lngs = get_address_coords(data)
     stacked = stack_coords(lats, lngs)
     stacked_copy = stacked.copy()

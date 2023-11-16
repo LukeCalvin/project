@@ -8,10 +8,8 @@ knn = NearestNeighbors(n_neighbors=15)
 
 site_groups = []
 
-TARGET_WORK_HOURS = 12
 
-
-def cluster_sites(TARGET_WORK_HOURS):
+def cluster_sites(TARGET_WORK_HOURS: str):
     data = clean_data()
     addresses, lats, lngs = get_address_coords(data)
     stacked = stack_coords(lats, lngs)

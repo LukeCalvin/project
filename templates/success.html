@@ -1,0 +1,37 @@
+<html>
+
+<head>
+    <title>Success Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .site-list {
+            font-size: 1.2em;
+            line-height: 1.6;
+            list-style-type: none;
+            /* Optionally remove bullet points */
+            padding-left: 0;
+        }
+
+        .site-list li {
+            margin-bottom: 10px;
+            /* Spacing between list items */
+        }
+    </style>
+</head>
+
+<body>
+    {% for site_list in all_site_lists %}
+    <h2>Crew {{ loop.index }}:</h2>
+    <ul>
+        {% for site in site_list %}
+        <li>{{ site }}</li>
+        {% endfor %}
+    </ul>
+    {% endfor %}
+</body>
+
+</html>

@@ -9,8 +9,8 @@ knn = NearestNeighbors(n_neighbors=15)
 site_groups = []
 
 
-def cluster_sites(TARGET_WORK_HOURS: str):
-    data = clean_data()
+def cluster_sites(target_work_hours: int, circuit: str) -> list[str]:
+    data = clean_data(circuit)
     addresses, lats, lngs = get_address_coords(data)
     stacked = stack_coords(lats, lngs)
     stacked_copy = stacked.copy()
@@ -50,7 +50,7 @@ def cluster_sites(TARGET_WORK_HOURS: str):
             # get total hours in neighbors_mat
         nbt_time_lst = list(neighbors_time_dict.values())
 
-        amount_over_target = hours_sum - TARGET_WORK_HOURS
+        amount_over_target = hours_sum - target_work_hours
 
         while True:
             val_to_remove = nbt_time_lst[
@@ -117,7 +117,7 @@ def get_address_coords(data):
 
     addresses = [x for x in addresses if x != [""]]
 
-    for x in addresses:
+    for x in addresses[0:120]:
         geocode = gmaps.geocode(x)
         geocode_pt = geocode[0].get("geometry").get("location")
         lat = geocode_pt.get("lat")

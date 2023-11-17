@@ -3,7 +3,7 @@ import pandas as pd
 from google.auth import default
 
 
-def clean_data():
+def clean_data(circuit):
     credentials, _ = default(scopes=["https://www.googleapis.com/auth/spreadsheets"])
     client = gspread.Client(auth=credentials)
 
@@ -12,12 +12,9 @@ def clean_data():
     HEADER_RANGE = "A11:U11"
 
     wb = client.open_by_url(url)
+    first_circuit = wb.worksheet(circuit)
 
     # Step 1: bring in the data & clean up
-
-    first_circuit = wb.get_worksheet_by_id(855023861)
-
-    from gspread import Worksheet
 
     colnames = first_circuit.get_values(HEADER_RANGE)
 
@@ -63,5 +60,7 @@ def clean_data():
         .replace("X", 1.25)
         .replace("", 1.25)
     )
-    data = data[data["status"] == False]
+    data = data[
+        data["status"] == False
+    ]  # changes data to only sites that aren't completed
     return data

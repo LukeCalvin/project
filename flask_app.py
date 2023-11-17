@@ -8,15 +8,18 @@ app = Flask(__name__)
 def success(circuit, crew_number, hours):
     hours = float(hours)
     crew_number = int(crew_number)
-    sites = cluster_sites(hours)
-    final = (sites[x] for x in range(0, crew_number))
-    return final
+    sites = cluster_sites(hours, circuit)
+    final = list(sites[x] for x in range(crew_number))
+    return render_template("success.html", all_site_lists=final)
 
 
 @app.route("/enter", methods=["POST", "GET"])
 def enter():
     if request.method == "POST":
         circuit = request.form["circuit"]
+        if circuit == "Other":
+            circuit = request.form.get("other_circuit", "Default Value")
+
         crew_number = request.form["crew_number"]
         hours = request.form["hours"]
         return redirect(

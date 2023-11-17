@@ -1,24 +1,20 @@
 import gspread
 import pandas as pd
+from google.auth import default
 
 
-def clean_data():
-    client = gspread.service_account(
-        filename="/Users/lukehakso/kemp/project/jobtracker.json"
-    )
+def clean_data(circuit):
+    credentials, _ = default(scopes=["https://www.googleapis.com/auth/spreadsheets"])
+    client = gspread.Client(auth=credentials)
 
     url = "https://docs.google.com/spreadsheets/d/1M__pvslmhMRkXCl-7DEPc0PzvKj6qlgfc8antAd9hgI/edit#gid=223128104"
-    sandbox_url = "https://docs.google.com/spreadsheets/d/1Mab3WIIMxUuFdjzayu1kYBbeIf_-fsLI89vgx9GPKho/edit#gid=223128104"
-
-    HEADER_RANGE = "A11:S11"
+    # sandbox_url = "https://docs.google.com/spreadsheets/d/1Mab3WIIMxUuFdjzayu1kYBbeIf_-fsLI89vgx9GPKho/edit#gid=223128104
+    HEADER_RANGE = "A11:U11"
 
     wb = client.open_by_url(url)
+    first_circuit = wb.worksheet(circuit)
 
     # Step 1: bring in the data & clean up
-
-    first_circuit = wb.get_worksheet_by_id(126684334)
-
-    from gspread import Worksheet
 
     colnames = first_circuit.get_values(HEADER_RANGE)
 
@@ -64,5 +60,7 @@ def clean_data():
         .replace("X", 1.25)
         .replace("", 1.25)
     )
-    data = data[data["status"] == False]
+    data = data[
+        data["status"] == False
+    ]  # changes data to only sites that aren't completed
     return data

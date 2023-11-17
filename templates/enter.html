@@ -1,11 +1,43 @@
 <html>
 
+<head>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            /* Change the font for the entire body */
+        }
+
+        select,
+        input[type="text"],
+        input[type="submit"] {
+            font-size: 1em;
+            /* Increase font size for form inputs */
+            padding: 10px;
+            /* Add some padding for better visibility */
+            margin: 5px 0;
+            /* Add margin for spacing between elements */
+        }
+    </style>
+</head>
+
 <body>
     <form action="/enter" method="post">
 
 
-        <p>Enter Circuit:</p>
-        <p><input type="text" name="circuit" /></p>
+        <p>Select Circuit:</p>
+
+        <select name="circuit" id="circuitSelect" onchange="showOtherField()">
+            <option value="2615 - North">2615 - North</option>
+            <option value="2722 - North">2722 - North</option>
+            <option value="Other">Other</option>
+        </select>
+
+        <!-- Hidden input field for 'Other' option -->
+        <p id="otherField" style="display:none;">
+            Enter Circuit:
+            <input type="text" name="other_circuit" />
+        </p>
 
         <p>Enter Number of Crews:</p>
         <p><input type="text" name="crew_number" /></p>
@@ -18,6 +50,15 @@
 
 
     </form>
+
+    <script>
+        function showOtherField() {
+            var selectBox = document.getElementById("circuitSelect");
+            var otherField = document.getElementById("otherField");
+            otherField.style.display = selectBox.value == "Other" ? "block" : "none";
+        }
+    </script>
+
 </body>
 
 </html>

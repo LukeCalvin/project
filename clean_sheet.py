@@ -40,12 +40,12 @@ def clean_data(circuit):
         {"requires_squirt_boom": bool}
     )
 
-    df = raw.assign(unique_id=range(raw.shape[0]))
+    # df = raw.assign(unique_id=range(raw.shape[0]))
     data = (
-        df.loc[
+        # was df.loc
+        raw.loc[
             :,
             [
-                "unique_id",
                 "full_address",
                 "projected_hours",
                 "requires_squirt_boom",

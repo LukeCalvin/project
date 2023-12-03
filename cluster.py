@@ -33,7 +33,7 @@ def cluster_sites(target_work_hours: int, circuit: str) -> list[str]:
 
             print(
                 f"""
-            {len(stacked_copy)} remaining sites:
+            {len(stacked_copy)} remaining sites (not full {target_work_hours} hours):
             {addresses_copy}
             """
             )

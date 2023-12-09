@@ -10,7 +10,7 @@ site_groups = []
 
 
 def cluster_sites(target_work_hours: int, circuit: str) -> list[str]:
-    data = clean_data(circuit)
+    data, orig_data = clean_data(circuit)
     addresses, lats, lngs = get_address_coords(data)
     stacked = stack_coords(lats, lngs)
     stacked_copy = stacked.copy()
@@ -53,12 +53,12 @@ def cluster_sites(target_work_hours: int, circuit: str) -> list[str]:
         amount_over_target = hours_sum - target_work_hours
 
         while True:
-            val_to_remove = nbt_time_lst[
-                min(
-                    range(len(nbt_time_lst)),
-                    key=lambda i: abs(nbt_time_lst[i] - amount_over_target),
-                )
-            ]
+            val_to_remove = nbt_time_lst[0]
+            # min(
+            # range(len(nbt_time_lst)),
+            # key=lambda i: abs(nbt_time_lst[i] - amount_over_target),
+            # )
+            # ]
             # finds the hours values in neighbors_time_dict that is closest to the amount over target
 
             if val_to_remove > amount_over_target:
@@ -76,19 +76,53 @@ def cluster_sites(target_work_hours: int, circuit: str) -> list[str]:
                 except ValueError:
                     pass
 
-        one_site_group = [
-            ele for idx, ele in enumerate(addresses_copy) if idx in neighbors_mat
-        ]
+        one_site_group = []
+        for idx in range(len(addresses_copy)):
+            if idx in neighbors_mat:
+                to_add = orig_data.iloc[idx].tolist()
+                if to_add[4]:
+                    to_add[4] = "Yes"
+                if not to_add[4]:
+                    to_add[4] = ""
+
+                if to_add[5]:
+                    to_add[5] = "Yes"
+                if not to_add[5]:
+                    to_add[5] = ""
+
+                if to_add[7]:
+                    to_add[7] = "Yes"
+                if not to_add[7]:
+                    to_add[7] = ""
+
+                if to_add[8]:
+                    to_add[8] = "Yes"
+                if not to_add[8]:
+                    to_add[8] = ""
+
+                if to_add[9]:
+                    to_add[9] = "Yes"
+                if not to_add[9]:
+                    to_add[9] = ""
+
+                del to_add[12]
+
+                one_site_group.append(to_add)
+
         addresses_copy = [
             ele for idx, ele in enumerate(addresses_copy) if idx not in neighbors_mat
         ]
+        orig_data = orig_data.reset_index(drop=True)
+        orig_data = orig_data.drop(neighbors_mat)
+
         stacked_copy = [
             ele for idx, ele in enumerate(stacked_copy) if idx not in neighbors_mat
         ]
 
         site_groups.append(one_site_group)
 
-    return clean(site_groups)
+    # return clean(site_groups)
+    return site_groups
 
 
 def get_key(val, neighbors_time_dict):

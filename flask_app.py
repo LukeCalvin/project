@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for, request, render_template
+from flask import Flask, redirect, url_for, request, render_template, make_response
 from cluster import *
 
 app = Flask(__name__)
@@ -10,7 +10,9 @@ def success(circuit, crew_number, hours):
     crew_number = int(crew_number)
     sites = cluster_sites(hours, circuit)
     final = list(sites[x] for x in range(crew_number))
-    return render_template("success.html", all_site_lists=final)
+    response = make_response(render_template("success.html", all_site_lists=final))
+    response.headers["Cache-Control"] = "no-store"
+    return response
 
 
 @app.route("/enter", methods=["POST", "GET"])

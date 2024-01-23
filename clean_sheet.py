@@ -60,7 +60,33 @@ def clean_data(circuit):
         .replace("X", 1.25)
         .replace("", 1.25)
     )
+    orig_data = (
+        raw.loc[
+            :,
+            [
+                "site_no",
+                "address",
+                "work_description",
+                "owner_phone_comments",
+                "no_parks",
+                "nbw",
+                "projected_hours",
+                "flagging",
+                "requires_squirt_boom",
+                "merge",
+                "notes",
+                "also_clear_for",
+                "status",
+            ],
+        ]
+        .replace("Not Started", False)
+        .replace("Done", True)
+        .replace("In Process", False)
+        .replace("Hold/ Change in Contract", True)
+    )
+
     data = data[
         data["status"] == False
     ]  # changes data to only sites that aren't completed
-    return data
+    orig_data = orig_data[orig_data["status"] == False]
+    return data, orig_data

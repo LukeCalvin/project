@@ -4,6 +4,7 @@
 
     <style>
         body {
+            text-align: center;
             font-family: Arial, sans-serif;
             /* Change the font for the entire body */
         }
@@ -18,17 +19,55 @@
             margin: 5px 0;
             /* Add margin for spacing between elements */
         }
+
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            position: fixed;
+            left: 50%;
+            top: 75%;
+            margin-top: -20px;
+            margin-left: -20px;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .logo {
+            width: 300px;
+            /* Or your desired width */
+            margin-top: 20px;
+            /* Add some space at the top */
+            margin-bottom: 20px;
+            /* Add some space below the logo */
+        }
     </style>
 </head>
 
 <body>
-    <form action="/enter" method="post">
+    <img src="/static/images/logo.png" alt="Logo" class="logo">
+
+    <div id="loader" class="loader"></div>
+
+    <form id="myForm" action="/enter" method="post">
 
 
         <p>Select Circuit:</p>
 
         <select name="circuit" id="circuitSelect" onchange="showOtherField()">
-            <option value="2615 - North">2615 - North</option>
+            <option value="2801 - South">2801 - South</option>
             <option value="2722 - North">2722 - North</option>
             <option value="Other">Other</option>
         </select>
@@ -52,6 +91,10 @@
     </form>
 
     <script>
+        document.getElementById('myForm').onsubmit = function () {
+            document.getElementById('loader').style.display = 'block';
+        };
+
         function showOtherField() {
             var selectBox = document.getElementById("circuitSelect");
             var otherField = document.getElementById("otherField");

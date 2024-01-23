@@ -8,17 +8,25 @@
             padding: 20px;
         }
 
-        .site-list {
-            font-size: 1.2em;
-            line-height: 1.6;
-            list-style-type: none;
-            /* Optionally remove bullet points */
-            padding-left: 0;
+        table {
+            width: 100%;
+            border-collapse: collapse;
         }
 
-        .site-list li {
-            margin-bottom: 10px;
-            /* Spacing between list items */
+        th,
+        td {
+            border: 1px solid black;
+            padding: 5px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .share-btn {
+            margin-left: 10px;
+            padding: 5px 10px;
         }
     </style>
 </head>
@@ -26,12 +34,41 @@
 <body>
     {% for site_list in all_site_lists %}
     <h2>Crew {{ loop.index }}:</h2>
-    <ul>
+    <table id="table{{ loop.index }}">
+        <tr>
+            <th>Site Number</th>
+            <th>Address</th>
+            <th>Work Description</th>
+            <th>Owner/Phone/Comments</th>
+            <th>No Parks</th>
+            <th>NBW</th>
+            <th>Projected Hours</th>
+            <th>Flagging</th>
+            <th>Squirt Boom</th>
+            <th>Merge</th>
+            <th>Notes</th>
+            <th>Also Clear For</th>
+        </tr>
         {% for site in site_list %}
-        <li>{{ site }}</li>
+        <tr>
+            {% for detail in site %}
+            <td>{{ detail }}</td>
+            {% endfor %}
+        </tr>
         {% endfor %}
-    </ul>
+    </table>
+    <!--<button onclick="shareTable('table{{ loop.index }}')" class="share-btn">Share Crew {{ loop.index }}</button>-->
+    </div>
     {% endfor %}
+
+    <script>
+        function shareTable(tableId) {
+            var table = document.getElementById(tableId);
+            var tableData = table.outerHTML; // or any other method to get the data
+
+            window.location.href = `mailto:?subject=Crew ${tableId} Data&body=${encodeURIComponent(tableData)}`;
+        }
+    </script>
 </body>
 
 </html>

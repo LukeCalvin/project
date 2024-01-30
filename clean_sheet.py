@@ -64,7 +64,7 @@ def clean_data(circuit):
                 "merge",
                 "notes",
                 "also_clear_for",
-                "status",
+                "is_complete",
             ],
         ]
         .replace("Not Started", False)
@@ -73,6 +73,6 @@ def clean_data(circuit):
         .replace("Hold/ Change in Contract", True)
     )
 
-    data = data[~data["status"]]  # changes data to only sites that aren't completed
-    orig_data = orig_data[~orig_data["status"]]
+    data = data[~data["is_complete"]]  # changes data to only sites that aren't completed
+    orig_data = orig_data[~orig_data["is_complete"]]
     return data, orig_data

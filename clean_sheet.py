@@ -2,6 +2,10 @@ import gspread
 import pandas as pd
 from google.auth import default
 
+COLNAME_REPLACEMENTS = {" ": "_", "/": "", "#": "no", "__": "_"}
+# last two are temporary, need to ask what X and blank mean
+VALUE_REPLACEMENTS = {"Not Started": False, "Done": True, "In Process": False, "X": 1.25, "": 1.25}
+
 
 def clean_data(circuit):
     credentials, _ = default(scopes=["https://www.googleapis.com/auth/spreadsheets"])
@@ -27,39 +31,23 @@ def clean_data(circuit):
         columns=colnames[:-1],
     )
 
-    munged_columns = [
-        x.lower()
-        .replace(" ", "_")
-        .replace("/", "")
-        .replace("#", "no")
-        .replace("__", "_")
-        for x in raw.columns
-    ]
+    for start, replacement in COLNAME_REPLACEMENTS.items():
+        munged_columns = [x.lower().replace(start, replacement) for x in raw.columns]
     raw.columns = munged_columns
-    raw = raw.rename(columns={"squirt_boom": "requires_squirt_boom"}).astype(
+    raw = raw.rename(columns={"squirt_boom": "requires_squirt_boom", "status": "is_complete"}).astype(
         {"requires_squirt_boom": bool}
     )
 
-    # df = raw.assign(unique_id=range(raw.shape[0]))
-    data = (
-        # was df.loc
-        raw.loc[
-            :,
-            [
-                "full_address",
-                "projected_hours",
-                "requires_squirt_boom",
-                "status",
-            ],
-        ]
-        .astype({"requires_squirt_boom": int})
-        .replace("Not Started", False)
-        .replace("Done", True)
-        .replace("In Process", False)
-        # last two are temporary, need to ask what X and blank mean
-        .replace("X", 1.25)
-        .replace("", 1.25)
-    )
+    data = raw.loc[
+        :,
+        [
+            "full_address",
+            "projected_hours",
+            "requires_squirt_boom",
+            "is_complete",
+        ],
+    ].astype({"requires_squirt_boom": int})
+    data = {data.replace(start, replacement) for start, replacement in VALUE_REPLACEMENTS.items()}
     orig_data = (
         raw.loc[
             :,
@@ -76,7 +64,7 @@ def clean_data(circuit):
                 "merge",
                 "notes",
                 "also_clear_for",
-                "status",
+                "is_complete",
             ],
         ]
         .replace("Not Started", False)
@@ -85,8 +73,6 @@ def clean_data(circuit):
         .replace("Hold/ Change in Contract", True)
     )
 
-    data = data[
-        data["status"] == False
-    ]  # changes data to only sites that aren't completed
-    orig_data = orig_data[orig_data["status"] == False]
+    data = data[~data["is_complete"]]  # changes data to only sites that aren't completed
+    orig_data = orig_data[~orig_data["is_complete"]]
     return data, orig_data

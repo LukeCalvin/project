@@ -44,7 +44,7 @@ def clean_data(circuit):
             "full_address",
             "projected_hours",
             "requires_squirt_boom",
-            "status",
+            "is_complete",
         ],
     ].astype({"requires_squirt_boom": int})
     data = {data.replace(start, replacement) for start, replacement in VALUE_REPLACEMENTS.items()}

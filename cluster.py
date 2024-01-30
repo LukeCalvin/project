@@ -59,7 +59,7 @@ def cluster_sites(target_work_hours: int, circuit: str) -> list[str]:
         # get total hours in neighbors_mat
         nbt_time_lst = list(job_time)
 
-        amount_over_target = hours_sum - target_work_hours
+        amount_over_target = np.array(hours_sum - target_work_hours)
         amount_over_target_without_element = amount_over_target - nbt_time_lst
         error = amount_over_target_without_element - target_work_hours
         # get the index the results in the smallest error without going 2.5 hours over

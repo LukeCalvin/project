@@ -28,9 +28,6 @@ def precompute_distance_matrix(points, penalty):
     return distance_matrix
 
 
-knn = NearestNeighbors(n_neighbors=15, metric="precomputed")
-
-
 def cluster_sites(target_work_hours: int, circuit: str) -> list[str]:
     data, orig_data = clean_data(circuit)
     addresses, lats, lngs = get_address_coords(data)
@@ -47,114 +44,50 @@ def cluster_sites(target_work_hours: int, circuit: str) -> list[str]:
             neighbors_mat = get_neighbors(stacked_copy)
 
         except ValueError:
-            # throws this error when there aren't enough sites left in stacked
-
-            print(
-                f"""
+            err_msg = f"""
             {len(stacked_copy)} remaining sites (not full {target_work_hours} hours):
             {addresses_copy}
             """
-            )
-            break
+            raise ValueError(err_msg)
 
-        for i in neighbors_mat:
-            # neighbors_mat is new every iteration, so indexes row 0
-            job_time = float(orig_data.iloc[i]["projected_hours"].rstrip(".").strip())
-            neighbors_time_dict[i] = job_time
-            # creates dict for site index and job_time
+        job_time = (
+            orig_data.iloc[neighbors_mat, :].loc["projected_hours"].apply(lambda val: float(val.rstrip(".").strip()))
+        )
+        neighbors_time_dict = {row: job_time for row, job_time in zip(range(len(neighbors_mat)), job_time.values)}
 
-        for hours in neighbors_time_dict.values():
-            hours_sum += hours
-            # get total hours in neighbors_mat
-        nbt_time_lst = list(neighbors_time_dict.values())
+        hours_sum = job_time.sum()
+        # get total hours in neighbors_mat
+        nbt_time_lst = list(job_time)
 
         amount_over_target = hours_sum - target_work_hours
-
-        while True:
-            val_to_remove = nbt_time_lst[0]
-            # min(
-            # range(len(nbt_time_lst)),
-            # key=lambda i: abs(nbt_time_lst[i] - amount_over_target),
-            # )
-            # ]
-            # finds the hours values in neighbors_time_dict that is closest to the amount over target
-
-            if val_to_remove > amount_over_target and amount_over_target > 2.5:
-                # makes sure no will not overestimate by more than 2.5 hours
-                for x in range(len(nbt_time_lst)):
-                    val = nbt_time_lst[x]
-                    if val < amount_over_target:
-                        val_to_remove = val
-                        break
-
-            if val_to_remove > amount_over_target:
-                break
-
-            amount_over_target = amount_over_target - val_to_remove
-            site_to_remove = list(get_key(val_to_remove, neighbors_time_dict))
-            nbt_time_lst.remove(val_to_remove)
-            for i in site_to_remove:
-                # because multiple sites have same hour value, this loop keeps an error from being raised and tries again with another site
-                try:
-                    neighbors_mat.remove(i)
-                    break
-
-                except ValueError:
-                    pass
+        amount_over_target_without_element = amount_over_target - nbt_time_lst
+        error = amount_over_target_without_element - target_work_hours
+        # get the index the results in the smallest error without going 2.5 hours over
+        error_minimizing_idx = error.index(min([x if x < 2.5 else np.inf for x in error]))
+        job_time_to_remove = nbt_time_lst[error_minimizing_idx]
+        amount_over_target -= job_time_to_remove
+        del nbt_time_lst[error_minimizing_idx]
+        # reverse the dict, then use the value as the key
+        site_to_remove = {v: k for k, v in neighbors_time_dict.items()}[job_time_to_remove]
+        neighbors_mat.remove(site_to_remove)
 
         one_site_group = []
         for idx in range(len(addresses_copy)):
             if idx in neighbors_mat:
-                to_add = orig_data.iloc[idx].tolist()
-                if to_add[4]:
-                    to_add[4] = "Yes"
-                if not to_add[4]:
-                    to_add[4] = ""
+                to_add = ["Yes" if item else "" for item in orig_data.iloc[idx]]
+            del to_add[12]
 
-                if to_add[5]:
-                    to_add[5] = "Yes"
-                if not to_add[5]:
-                    to_add[5] = ""
+            one_site_group.append(to_add)
 
-                if to_add[7]:
-                    to_add[7] = "Yes"
-                if not to_add[7]:
-                    to_add[7] = ""
-
-                if to_add[8]:
-                    to_add[8] = "Yes"
-                if not to_add[8]:
-                    to_add[8] = ""
-
-                if to_add[9]:
-                    to_add[9] = "Yes"
-                if not to_add[9]:
-                    to_add[9] = ""
-
-                del to_add[12]
-
-                one_site_group.append(to_add)
-
-        addresses_copy = [
-            ele for idx, ele in enumerate(addresses_copy) if idx not in neighbors_mat
-        ]
+        addresses_copy = [ele for idx, ele in enumerate(addresses_copy) if idx not in neighbors_mat]
         orig_data = orig_data.reset_index(drop=True)
         orig_data = orig_data.drop(neighbors_mat)
 
-        stacked_copy = [
-            ele for idx, ele in enumerate(stacked_copy) if idx not in neighbors_mat
-        ]
+        stacked_copy = [ele for idx, ele in enumerate(stacked_copy) if idx not in neighbors_mat]
 
         site_groups.append(one_site_group)
 
-    # return clean(site_groups)
     return site_groups
-
-
-def get_key(val, neighbors_time_dict):
-    for key, value in neighbors_time_dict.items():
-        if val == value:
-            yield key
 
 
 def clean(site_groups):
@@ -196,12 +129,11 @@ def stack_coords(addresses, lats, lngs):
 
 
 def get_neighbors(stacked):
+    knn = NearestNeighbors(n_neighbors=15, metric="precomputed")
     # coords = [(lat, lng) for street, lat, lng in stacked]
     distance_matrix = precompute_distance_matrix(stacked, street_change_penalty)
     knn.fit(distance_matrix)
     _, neighbors_mat = knn.kneighbors(distance_matrix)
 
-    neighbors_mat = list(
-        reversed(neighbors_mat[0])
-    )  # reversed so closest pt comes last
+    neighbors_mat = list(reversed(neighbors_mat[0]))  # reversed so closest pt comes last
     return neighbors_mat
